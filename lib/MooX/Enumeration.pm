@@ -221,7 +221,70 @@ MooX::Enumeration - shortcuts for working with enum attributes in Moo
 
 =head1 SYNOPSIS
 
+Given this class:
+
+   package MyApp::Result {
+      use Moo;
+      use Types::Standard qw(Enum);
+      has status => (
+         is        => "rw",
+         isa       => Enum[qw/ pass fail /],
+      );
+   }
+
+It's quite common to do this kind of thing:
+
+   if ( $result->status eq "pass" ) { ... }
+
+But if you're throwing strings around, it can be quite easy to mistype
+them:
+
+   if ( $result->status eq "apss" ) { ... }
+
+And the comparison silently fails. Instead, let's define the class like
+this:
+
+   package MyApp::Result {
+      use Moo;
+      use MooX::Enumeration;
+      use Types::Standard qw(Enum);
+      has status => (
+         is        => "rw",
+         isa       => Enum[qw/ pass fail /],
+         handles   => [qw/ is_pass is_fail /],
+      );
+   }
+
+So you can use the class like this:
+
+   if ( $result->is_pass ) { ... }
+
+Yay!
+
 =head1 DESCRIPTION
+
+This is a Moo implementation of L<MooseX::Enumeration>. All the features
+from the Moose version should work here.
+
+Passing C<< traits => ["Enumeration"] >> to C<has> is not needed with
+MooX::Enumeration. This module's magic is automatically applied to all
+attributes with a L<Type::Tiny::Enum> type constraint.
+
+Simple example:
+
+   package MyClass {
+      use Moo;
+      use MooX::Enumeration;
+      
+      has xyz => (is => "ro", enum => [qw/foo bar baz/], handles => 1);
+   }
+
+C<< MyClass->new(xyz => "quux") >> will throw an error.
+
+Objects of the class will have C<< $object->is_foo >>, C<< $object->is_bar >>,
+and C<< $object->is_baz >> methods.
+
+For more details of method delegation, see L<MooseX::Enumeration>.
 
 =head1 BUGS
 
@@ -229,6 +292,12 @@ Please report any bugs to
 L<http://rt.cpan.org/Dist/Display.html?Queue=MooX-Enumeration>.
 
 =head1 SEE ALSO
+
+L<MooseX::Enumeration>.
+
+L<Type::Tiny::Enum>.
+
+L<Moo>.
 
 =head1 AUTHOR
 
@@ -240,7 +309,6 @@ This software is copyright (c) 2018 by Toby Inkster.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
-
 
 =head1 DISCLAIMER OF WARRANTIES
 
