@@ -1,4 +1,4 @@
-use 5.010001;
+use 5.008001;
 use strict;
 use warnings;
 no warnings 'once';
@@ -9,7 +9,6 @@ use Carp qw(croak);
 use Scalar::Util qw(blessed);
 use Sub::Util qw(set_subname);
 use B qw(perlstring);
-use namespace::autoclean;
 
 our $AUTHORITY = 'cpan:TOBYINK';
 our $VERSION   = '0.001';

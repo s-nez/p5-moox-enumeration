@@ -3,7 +3,14 @@
 @prefix : <http://ontologi.es/doap-deps#>.
 
 `MooX-Enumeration`
+	:runtime-requirement    [ :on "perl 5.008001"^^:CpanId ];
+	:runtime-requirement    [ :on "Moo 1.006000"^^:CpanId ];
+	:runtime-requirement    [ :on "Sub::Util 1.40"^^:CpanId ];
+	:runtime-requirement    [ :on "Types::Standard 0.030"^^:CpanId ];
+	:runtime-recommendation [ :on "MooseX::Enumeration"^^:CpanId ];
 	:test-requirement       [ :on "Test::More 0.96"^^:CpanId ];
+	:test-requirement       [ :on "Test::Fatal"^^:CpanId ];
+	:test-recommendation    [ :on "MooseX::Enumeration"^^:CpanId ];
 	:develop-recommendation [ :on "Dist::Inkt 0.001"^^:CpanId ];
 	.
 

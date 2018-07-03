@@ -22,7 +22,6 @@ the same terms as the Perl 5 programming language system itself.
 use 5.008001;
 use strict;
 use warnings;
-use Test::Requires { 'Types::Standard' => '0.030' };
 use Test::More tests => 4;
 
 {
