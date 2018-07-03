@@ -91,7 +91,17 @@ sub process_spec {
 		$spec{handles} = $handles;
 	}
 	
-	# TODO: moosify stuff
+	# Install moosify stuff
+	if (ref $spec{moosify} eq 'CODE') {
+		$spec{moosify} = [$spec{moosify}];
+	}
+	push @{ $spec{moosify} ||= [] }, sub {
+		my $spec = shift;
+		require MooseX::Enumeration;
+		require MooseX::Enumeration::Meta::Attribute::Native::Trait::Enumeration;
+		push @{ $spec->{traits} ||= [] }, 'Enumeration';
+		$spec->{handles} ||= $spec->{_orig_handles} if $spec->{_orig_handles};
+	};
 	
 	return %spec;
 }
