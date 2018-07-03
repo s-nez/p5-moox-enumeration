@@ -4,3 +4,8 @@
 	issued  2018-07-03;
 	label   "Initial release".
 
+`MooX-Enumeration 0.002 cpan:TOBYINK`
+	issued  2018-07-03;
+	changeset [
+		item "Can haz docs?."^^Documentation;
+	].
