@@ -132,10 +132,13 @@ sub build_is_delegate {
 		? $MAKER->generate_simple_get('$_[0]', $attr, $spec)
 		: ($MAKER->_generate_get($attr, $spec), delete($MAKER->{captures}));
 	
+	my $desc = "delegated method $target\::$method";
+	
 	if (ref $match) {
 		require match::simple;
 		$CAPTURES->{'$match'} = \$match;
 		return Eval::TypeTiny::eval_closure(
+			description => $desc,
 			source => sprintf(
 				'sub { %s; my $value = %s; match::simple::match($value, $match) }',
 				$class->_build_throw_args($method, 0),
@@ -146,6 +149,7 @@ sub build_is_delegate {
 	}
 	elsif ($spec->{isa}->check($match)) {
 		return Eval::TypeTiny::eval_closure(
+			description => $desc,
 			source => sprintf(
 				'sub { %s; %s eq %s }',
 				$class->_build_throw_args($method, 0),
@@ -188,13 +192,15 @@ sub build_assign_delegate {
 			$code;
 		};
 
-	my $err = 'Method %s cannot be called when attribute %s has value %s';
+	my $err  = 'Method %s cannot be called when attribute %s has value %s';
+	my $desc = "delegated method $target\::$method";
 
 	if (ref $match) {
 		require match::simple;
 		my $_SET = $SET->(perlstring $newvalue);
 		$CAPTURES->{'$match'} = \$match;
 		return Eval::TypeTiny::eval_closure(
+			description => $desc,
 			source => sprintf(
 				'sub { %s; my $value = %s; return $_[0] if $value eq %s; match::simple::match($value, $match) ? (%s) : Carp::croak(sprintf %s, %s, %s, $value); $_[0] }',
 				$class->_build_throw_args($method, 0),
@@ -213,6 +219,7 @@ sub build_assign_delegate {
 			or croak sprintf "Attribute $attr cannot be %s", perlstring($match);
 		my $_SET = $SET->(perlstring $newvalue);
 		return Eval::TypeTiny::eval_closure(
+			description => $desc,
 			source => sprintf(
 				'sub { %s; my $value = %s; return $_[0] if $value eq %s; ($value eq %s) ? (%s) : Carp::croak(sprintf %s, %s, %s, $value); $_[0] }',
 				$class->_build_throw_args($method, 0),
@@ -230,6 +237,7 @@ sub build_assign_delegate {
 	else {
 		my $_SET = $SET->(perlstring $newvalue);
 		return Eval::TypeTiny::eval_closure(
+			description => $desc,
 			source => sprintf(
 				'sub { %s; %s; $_[0] }',
 				$class->_build_throw_args($method, 0),
