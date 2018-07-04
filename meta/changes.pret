@@ -20,3 +20,12 @@
 			dcs:thanks cpan:SREZIC;
 		];
 	].
+
+`MooX-Enumeration 0.004 cpan:TOBYINK`
+	issued  2018-07-04;
+	changeset [
+		item [
+			a dcs:Bugfix;
+			label "Properly support attributes with triggers and lazy defaults/builders.";
+		];
+	].
