@@ -29,3 +29,12 @@
 			label "Properly support attributes with triggers and lazy defaults/builders.";
 		];
 	].
+
+`MooX-Enumeration 0.005 cpan:TOBYINK`
+	issued  2018-07-04;
+	changeset [
+		item [
+			a dcs:Bugfix;
+			label "Fix precendence issue with lazy defaults/builders.";
+		];
+	].
