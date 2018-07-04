@@ -10,7 +10,7 @@
 	:runtime-requirement    [ :on "match::simple"^^:CpanId ];
 	:runtime-requirement    [ :on "Eval::TypeTiny"^^:CpanId ];
 	:runtime-recommendation [ :on "match::simple::XS"^^:CpanId ];
-	:runtime-recommendation [ :on "MooseX::Enumeration"::Tiny::Enum ];
+	:runtime-recommendation [ :on "MooseX::Enumeration"^^:CpanId ];
 	:test-requirement       [ :on "Test::More 0.96"^^:CpanId ];
 	:test-requirement       [ :on "Test::Fatal"^^:CpanId ];
 	:test-requirement       [ :on "Types::Standard 0.030"^^:CpanId ];
