@@ -4,7 +4,7 @@
 
 =head1 PURPOSE
 
-Test that MooX::Enumeration works on lazy attributes.
+Test that MooX::Enumeration works with triggers.
 
 =head1 AUTHOR
 
@@ -22,7 +22,9 @@ the same terms as the Perl 5 programming language system itself.
 use 5.008001;
 use strict;
 use warnings;
-use Test::More tests => 4;
+use Test::More tests => 5;
+
+my $var = 0;
 
 {
 	package Local::Test;
@@ -40,6 +42,7 @@ use Test::More tests => 4;
 			is_baz            => [ is => "baz" ],
 			assign_bar_if_foo => [ assign => "bar", "foo" ],
 		},
+		trigger => sub { ++$var },
 	);
 	
 	sub _build_status { "foo" }
@@ -55,3 +58,6 @@ ok(!Local::Test->new->is_baz, "lazy defaults work with is, 3");
 #);
 
 ok(Local::Test->new->assign_bar_if_foo->is_bar, "lazy defaults work with assign");
+
+is($var, 1, "trigger worked");  # trigger
+

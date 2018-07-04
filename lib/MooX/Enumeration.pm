@@ -36,8 +36,7 @@ sub setup_for {
 		for my $attr (@$attrs) {
 			%spec = $class->process_spec($target, $attr, %spec);
 			if (ref $spec{handles}) {
-				my $handles = $spec{_orig_handles} = delete $spec{handles};
-				$class->install_delegates($target, $attr, $spec{isa}, %$handles);
+				$class->install_delegates($target, $attr, \%spec);
 			}
 			$orig->($attr, %spec);
 		}
@@ -106,8 +105,12 @@ sub process_spec {
 }
 
 sub install_delegates {
+	require Eval::TypeTiny;
+	
 	my $class  = shift;
-	my ($target, $attr, $type, %delegates) = @_;
+	my ($target, $attr, $spec) = @_;
+	
+	my %delegates = %{ $spec->{_orig_handles} = delete $spec->{handles} };
 	
 	for my $method (keys %delegates) {
 		my ($delegate_type, @delegate_params) = @{ $delegates{$method} };
@@ -116,28 +119,40 @@ sub install_delegates {
 		no strict 'refs';
 		*{"${target}::${method}"} =
 			set_subname "${target}::${method}",
-			$class->$builder($target, $method, $attr, $type, @delegate_params);
+			$class->$builder($target, $method, $attr, $spec, @delegate_params);
 	}
 }
 
 sub build_is_delegate {
 	my $class  = shift;
-	my ($target, $method, $attr, $type, $match) = @_;
+	my ($target, $method, $attr, $spec, $match) = @_;
+	
+	my $MAKER = Moo->_accessor_maker_for($target);
+	my ($GET, $CAPTURES) = $MAKER->is_simple_get($attr, $spec)
+		? $MAKER->generate_simple_get('$_[0]', $attr, $spec)
+		: ($MAKER->_generate_get($attr, $spec), delete($MAKER->{captures}));
 	
 	if (ref $match) {
 		require match::simple;
-		return eval sprintf(
-			'sub { %s; match::simple::match($_[0]{%s}, $match) }',
-			$class->_build_throw_args($method, 0),
-			perlstring($attr),
+		$CAPTURES->{'$match'} = \$match;
+		return Eval::TypeTiny::eval_closure(
+			source => sprintf(
+				'sub { %s; my $value = %s; match::simple::match($value, $match) }',
+				$class->_build_throw_args($method, 0),
+				$GET,
+			),
+			environment => $CAPTURES,
 		);
 	}
-	elsif ($type->check($match)) {
-		return eval sprintf(
-			'sub { %s; $_[0]{%s} eq %s }',
-			$class->_build_throw_args($method, 0),
-			perlstring($attr),
-			perlstring($match),
+	elsif ($spec->{isa}->check($match)) {
+		return Eval::TypeTiny::eval_closure(
+			source => sprintf(
+				'sub { %s; %s eq %s }',
+				$class->_build_throw_args($method, 0),
+				$GET,
+				perlstring($match),
+			),
+			environment => $CAPTURES,
 		);
 	}
 	else {
@@ -147,51 +162,80 @@ sub build_is_delegate {
 
 sub build_assign_delegate {
 	my $class  = shift;
-	my ($target, $method, $attr, $type, $newvalue, $match) = @_;
+	my ($target, $method, $attr, $spec, $newvalue, $match) = @_;
 
 	croak sprintf "Attribute $attr cannot be %s", perlstring($newvalue)
-		unless $type->check($newvalue);
+		unless $spec->{isa}->check($newvalue) || !$spec->{isa};
+
+	my $MAKER = Moo->_accessor_maker_for($target);
+	my ($GET, $CAPTURES) = $MAKER->is_simple_get($attr, $spec)
+		? $MAKER->generate_simple_get('$_[0]', $attr, $spec)
+		: ($MAKER->_generate_get($attr, $spec), delete($MAKER->{captures})||{});
 	
+	# We can actually use the simple version set even if there's a type constraint,
+	# because we've already checked that $newvalue passes the type constraint!
+	#
+	my $SET = $MAKER->is_simple_set($attr, do { my %temp = %$spec; delete $temp{coerce}; delete $temp{isa}; \%temp })
+		? sub {
+			my ($var) = @_;
+			$MAKER->_generate_simple_set('$_[0]', $attr, $spec, $var);
+		}
+		: sub { # that allows us to avoid going down this yucky code path
+			my ($var) = @_;
+			my $code = $MAKER->_generate_set($attr, $spec);
+			$CAPTURES = { %$CAPTURES, %{ delete($MAKER->{captures}) or {} } };  # merge environments
+			$code = sprintf "do { local \@_ = (\$_[0], $var); %s }", $code;
+			$code;
+		};
+
 	my $err = 'Method %s cannot be called when attribute %s has value %s';
 
 	if (ref $match) {
 		require match::simple;
-		return eval sprintf(
-			'sub { %s; return $_[0] if $_[0]{%s} eq %s; match::simple::match($_[0]{%s}, $match) ? ($_[0]{%s}=%s) : Carp::croak(sprintf %s, %s, %s, $_[0]{%s}); $_[0] }',
-			$class->_build_throw_args($method, 0),
-			perlstring($attr),
-			perlstring($newvalue),
-			perlstring($attr),
-			perlstring($attr),
-			perlstring($newvalue),
-			perlstring($err),
-			perlstring($method),
-			perlstring($attr),
-			perlstring($attr),
+		my $_SET = $SET->(perlstring $newvalue);
+		$CAPTURES->{'$match'} = \$match;
+		return Eval::TypeTiny::eval_closure(
+			source => sprintf(
+				'sub { %s; my $value = %s; return $_[0] if $value eq %s; match::simple::match($value, $match) ? (%s) : Carp::croak(sprintf %s, %s, %s, $value); $_[0] }',
+				$class->_build_throw_args($method, 0),
+				$GET,
+				perlstring($newvalue),
+				$_SET,
+				perlstring($err),
+				perlstring($method),
+				perlstring($attr),
+			),
+			environment => $CAPTURES,
 		);
 	}
 	elsif (defined $match) {
-		return eval sprintf(
-			'sub { %s; return $_[0] if $_[0]{%s} eq %s; ($_[0]{%s} eq %s) ? ($_[0]{%s}=%s) : Carp::croak(sprintf %s, %s, %s, $_[0]{%s}); $_[0] }',
-			$class->_build_throw_args($method, 0),
-			perlstring($attr),
-			perlstring($newvalue),
-			perlstring($attr),
-			perlstring($match),
-			perlstring($attr),
-			perlstring($newvalue),
-			perlstring($err),
-			perlstring($method),
-			perlstring($attr),
-			perlstring($attr),
+		$spec->{isa}->check($match)
+			or croak sprintf "Attribute $attr cannot be %s", perlstring($match);
+		my $_SET = $SET->(perlstring $newvalue);
+		return Eval::TypeTiny::eval_closure(
+			source => sprintf(
+				'sub { %s; my $value = %s; return $_[0] if $value eq %s; ($value eq %s) ? (%s) : Carp::croak(sprintf %s, %s, %s, $value); $_[0] }',
+				$class->_build_throw_args($method, 0),
+				$GET,
+				perlstring($newvalue),
+				perlstring($match),
+				$_SET,
+				perlstring($err),
+				perlstring($method),
+				perlstring($attr),
+			),
+			environment => $CAPTURES,
 		);
 	}
 	else {
-		return eval sprintf(
-			'sub { %s; $_[0]{%s} = %s; $_[0] }',
-			$class->_build_throw_args($method, 0),
-			perlstring($attr),
-			perlstring($newvalue),
+		my $_SET = $SET->(perlstring $newvalue);
+		return Eval::TypeTiny::eval_closure(
+			source => sprintf(
+				'sub { %s; %s; $_[0] }',
+				$class->_build_throw_args($method, 0),
+				$_SET,
+			),
+			environment => $CAPTURES,
 		);
 	}
 }
