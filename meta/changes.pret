@@ -37,4 +37,17 @@
 			a dcs:Bugfix;
 			label "Fix precendence issue with lazy defaults/builders.";
 		];
+		item [
+			a dcs:Packaging;
+			label "Add explicit dependency on Eval::TypeTiny (which has been required since 0.004).";
+		];
+	].
+
+`MooX-Enumeration 0.006 cpan:TOBYINK`
+	issued  2018-07-04;
+	changeset [
+		item [
+			a dcs:Packaging;
+			label "Depend on Type::Tiny::Enum instead of Types::Standard. (The latter is still used for test suite.)";
+		];
 	].
