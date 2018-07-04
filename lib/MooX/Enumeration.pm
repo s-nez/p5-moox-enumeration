@@ -151,7 +151,7 @@ sub build_is_delegate {
 		return Eval::TypeTiny::eval_closure(
 			description => $desc,
 			source => sprintf(
-				'sub { %s; %s eq %s }',
+				'sub { %s; (%s) eq %s }',
 				$class->_build_throw_args($method, 0),
 				$GET,
 				perlstring($match),
