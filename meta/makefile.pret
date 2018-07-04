@@ -8,6 +8,7 @@
 	:runtime-requirement    [ :on "Sub::Util 1.40"^^:CpanId ];
 	:runtime-requirement    [ :on "Types::Standard 0.030"^^:CpanId ];
 	:runtime-requirement    [ :on "match::simple"^^:CpanId ];
+	:runtime-requirement    [ :on "Eval::TypeTiny"^^:CpanId ];
 	:runtime-recommendation [ :on "match::simple::XS"^^:CpanId ];
 	:runtime-recommendation [ :on "MooseX::Enumeration"^^:CpanId ];
 	:test-requirement       [ :on "Test::More 0.96"^^:CpanId ];
