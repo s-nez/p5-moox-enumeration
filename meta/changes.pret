@@ -9,3 +9,14 @@
 	changeset [
 		item "Can haz docs?."^^Documentation;
 	].
+
+`MooX-Enumeration 0.003 cpan:TOBYINK`
+	issued  2018-07-04;
+	changeset [
+		item [
+			a dcs:Packaging;
+			label "Add missing dependency on match::simple.";
+			dcs:fixes RT#125748;
+			dcs:thanks cpan:SREZIC;
+		];
+	].
