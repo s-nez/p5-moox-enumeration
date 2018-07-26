@@ -51,3 +51,14 @@
 			label "Depend on Type::Tiny::Enum instead of Types::Standard. (The latter is still used for test suite.)";
 		];
 	].
+
+`MooX-Enumeration 0.007 cpan:TOBYINK`
+	label   "Bond. James Bond.";
+	issued  2018-07-26;
+	changeset [
+		item [
+			a dcs:Bugfix;
+			label "Don't try to install delegate methods for attributes that aren't even enumerations.";
+			rdfs:seeAlso <https://github.com/tobyink/p5-moox-enumeration/issues/1>;
+		];
+	].
