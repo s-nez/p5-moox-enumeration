@@ -31,7 +31,7 @@ use Test::More tests => 2;
 
         ok ( eval 'use MooX::Enumeration; 1;',
              'loaded into role'  )
-             or note $@;
+             or BAIL_OUT( $@ );
 
 	has status => (
 		is      => 'ro',
