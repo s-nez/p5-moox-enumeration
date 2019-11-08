@@ -23,7 +23,7 @@ sub setup_for {
 	my $class = shift;
 	my ($target) = @_;
 	
-	my $orig = $Moo::MAKERS{$target}{exports}{has}
+	my $orig = $Moo::MAKERS{$target}{non_methods}{has}
 		or croak("$target doesn't have a `has` function");
 	
 	Moo::_install_tracked $target, has => sub {
