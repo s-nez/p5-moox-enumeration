@@ -42,7 +42,7 @@ use Test::More tests => 2;
 {
 	package Local::Test;
 	use Moo;
-	use Local::Test::Role;
+	with 'Local::Test::Role';
 }
 
 ok( Local::Test->new( status => 'foo' )->is_foo, "handled is foo" );
