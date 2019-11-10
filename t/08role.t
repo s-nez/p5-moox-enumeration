@@ -12,7 +12,7 @@ Toby Inkster E<lt>tobyink@cpan.orgE<gt>.
 
 =head1 COPYRIGHT AND LICENCE
 
-This software is copyright (c) 2018 by Toby Inkster.
+This software is copyright (c) 2018 Diab Jerius.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
@@ -26,12 +26,11 @@ use Test::More tests => 2;
 
 {
 	package Local::Test::Role;
-        use Test::More;
+	use Test::More;
 	use Moo::Role;
 
-        ok ( eval 'use MooX::Enumeration; 1;',
-             'loaded into role'  )
-             or BAIL_OUT( $@ );
+	ok (eval 'use MooX::Enumeration; 1;', 'loaded into role')
+		or BAIL_OUT($@);
 
 	has status => (
 		is      => 'ro',
@@ -43,14 +42,14 @@ use Test::More tests => 2;
 {
 	package Local::Test;
 	use Moo;
-        use Local::Test::Role;
+	use Local::Test::Role;
 }
 
 ok( Local::Test->new( status => 'foo' )->is_foo, "handled is foo" );
 like(
-    eval { Local::Test->new( status => 'goo' )->is_bar } || $@,
-    qr/did not pass type constraint/,
-    "rejected bad input"
+	eval { Local::Test->new( status => 'goo' )->is_bar } || $@,
+	qr/did not pass type constraint/,
+	"rejected bad input"
 );
 
 
