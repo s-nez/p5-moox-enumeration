@@ -62,3 +62,15 @@
 			rdfs:seeAlso <https://github.com/tobyink/p5-moox-enumeration/issues/1>;
 		];
 	].
+
+`MooX-Enumeration 0.008 cpan:TOBYINK`
+	issued  2019-11-10;
+	changeset [
+		item [
+			a dcs:Bugfix;
+			label "Fix for recent versions of Moo.";
+			dcs:fixes RT#130941;			
+			rdfs:seeAlso <https://github.com/tobyink/p5-moox-enumeration/pull/3>;
+			dcs:blame cpan:DJERIUS;
+		];
+	].
