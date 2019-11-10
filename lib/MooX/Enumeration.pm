@@ -11,7 +11,7 @@ use Sub::Util qw(set_subname);
 use B qw(perlstring);
 
 our $AUTHORITY = 'cpan:TOBYINK';
-our $VERSION   = '0.008';
+our $VERSION   = '0.009';
 
 sub import {
 	my $class  = shift;
