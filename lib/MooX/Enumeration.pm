@@ -26,6 +26,7 @@ sub setup_for {
 	my ($orig, $installer);
 	if ($INC{'Moo/Role.pm'} && Moo::Role->is_role($target)) {
 		$installer = 'Moo::Role::_install_tracked';
+		$orig = $Moo::Role::INFO{$package}{exports}{has};
 	}
 	elsif ($Moo::MAKERS{$target} && $Moo::MAKERS{$target}{is_class}) {
 		$installer = 'Moo::_install_tracked';
