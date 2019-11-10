@@ -75,7 +75,7 @@
 		];
 	].
 
-`MooX-Enumeration 0.008 cpan:TOBYINK`
+`MooX-Enumeration 0.009 cpan:TOBYINK`
 	issued  2019-11-10;
 	changeset [
 		item "Role support."^^Change;
