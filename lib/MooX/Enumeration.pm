@@ -88,7 +88,10 @@ sub process_spec {
 		if (!ref $handles and $handles eq 1) {
 			$handles = +{ map +( "is_$_" => [ "is", $_ ] ), @values };
 		}
-		
+		elsif (!ref $handles and $handles eq 2) {
+			$handles = +{ map +( "$attr\_is_$_" => [ "is", $_ ] ), @values };
+		}
+
 		if (ref $handles eq 'ARRAY') {
 			$handles = +{ map ref($_)?@$_:($_=>[split/_/,$_,2]), @$handles };
 		}
@@ -367,6 +370,9 @@ C<< MyClass->new(xyz => "quux") >> will throw an error.
 
 Objects of the class will have C<< $object->is_foo >>, C<< $object->is_bar >>,
 and C<< $object->is_baz >> methods.
+
+If you use C<< handles => 2 >>, then you get C<< $object->xyz_is_foo >>, etc
+methods.
 
 For more details of method delegation, see L<MooseX::Enumeration>.
 
