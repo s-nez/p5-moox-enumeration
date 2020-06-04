@@ -39,12 +39,14 @@ sub setup_for {
 	ref($orig) or croak("$target doesn't have a `has` function");
 	
 	$target->$installer(has => sub {
-		if (@_ % 2 == 0) {
-			croak "Invalid options for attribute(s): even number of arguments expected, got " . scalar @_;
-		}
-		
-		my ($attrs, %spec) = @_;
+		my $attrs = shift;
 		$attrs = [$attrs] unless ref $attrs;
+		if (@_ % 2 != 0) {
+			croak "Invalid options for " . join(', ', map "'$_'", @$attrs)
+				. " attribute(s): even number of arguments expected, got " . scalar @_;
+		}
+
+		my %spec = @_;
 		for my $attr (@$attrs) {
 			%spec = $class->process_spec($target, $attr, %spec);
 			if (delete $spec{moox_enumeration_process_handles}) {
